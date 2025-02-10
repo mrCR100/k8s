@@ -144,6 +144,14 @@ spec:
         volumeMounts:
         - name: data-storage
           mountPath: /app/backend/data
+        # not a must, just guess the resources.
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 128Mi
+          limits: 
+            cpu: 2000m
+            memory: 1Gi
       restartPolicy: Always
       volumes:
       - name: data-storage
