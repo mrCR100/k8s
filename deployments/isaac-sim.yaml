@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nvidia
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isaac-sim
+  namespace: nvidia
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: isaac-sim
+  template:
+    metadata:
+      labels:
+        name: isaac-sim
+    spec:
+      containers:
+      - name: isaac-sim
+        image: nvcr.io/nvidia/isaac-sim:4.2.0 
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh","-c","./isaac-sim.headless.webrtc.sh --allow-root"]
+        ports:
+        - name: webrtc
+          containerPort: 8211
+          protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: PRIVACY_CONSENT
+          value: "Y"
+        volumeMounts:
+        - name: cache-kit
+          mountPath: /isaac-sim/kit/cache
+        - name: cache-ov
+          mountPath: /root/.cache/ov
+        - name: cache-pip
+          mountPath: /root/.cache/pip
+        - name: cache-glcache
+          mountPath: /root/.cache/nvidia/GLCache
+        - name: cache-computecache
+          mountPath: /root/.nv/ComputeCache
+        - name: logs
+          mountPath: /root/.nvidia-omniverse/logs
+        - name: data
+          mountPath: /root/.local/share/ov/data
+        - name: documents
+          mountPath: /root/Documents
+      volumes:
+      - name: cache-kit
+        hostPath:
+          path: /root/docker/isaac-sim/cache/kit
+          type: DirectoryOrCreate
+      - name: cache-ov
+        hostPath:
+          path: /root/docker/isaac-sim/cache/ov
+          type: DirectoryOrCreate
+      - name: cache-pip
+        hostPath:
+          path: /root/docker/isaac-sim/cache/pip
+          type: DirectoryOrCreate
+      - name: cache-glcache
+        hostPath:
+          path: /root/docker/isaac-sim/cache/glcache
+          type: DirectoryOrCreate
+      - name: cache-computecache
+        hostPath:
+          path: /root/docker/isaac-sim/cache/computecache
+          type: DirectoryOrCreate
+      - name: logs
+        hostPath:
+          path: /root/docker/isaac-sim/logs
+          type: DirectoryOrCreate
+      - name: data
+        hostPath:
+          path: /root/docker/isaac-sim/data
+          type: DirectoryOrCreate
+      - name: documents
+        hostPath:
+          path: /root/docker/isaac-sim/documents
+          type: DirectoryOrCreate
+      runtimeClassName: nvidia
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: isaac-sim
+  namespace: nvidia
+spec:
+  selector:
+    name: isaac-sim
+  ports:
+    - protocol: TCP
+      name: webrtc
+      targetPort: webrtc
+      port: 8211
+  type: NodePort 
