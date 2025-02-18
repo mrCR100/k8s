@@ -31,6 +31,14 @@ spec:
         env:
         - name: OLLAMA_DEBUG
           value: "1"
+        # - name: OLLAMA_SCHED_SPREAD
+        #   value: "1"
+  
+        # If the model will entirely fit on any single GPU, 
+        # Ollama will load the model on that GPU by default. 
+        # This typically provides the best performance 
+        # as it reduces the amount of data transferring across the PCI bus during inference.
+        # OLLAMA_SCHED_SPREAD=1 will spread the model across all GPUs by force.
       volumes:
       - name: models
         hostPath:
