@@ -87,6 +87,14 @@ Nvidia Container Toolkit主要的作用是使得容器能够使用Nvidia GPU
         sudo apt-get update
         sudo apt-get install -y nvidia-container-toolkit
 
+### 配置nvidia-container-runtime
+
+主要是避免ollama容器中出现使用Nvidia GPU时出现CUDA_ERROR_NOT_PERMITTED问题。
+
+vi /etc/nvidia-container-runtime/config.toml
+[nvidia-container-cli]
+no-cgroups = false
+
 ### 配置containerd, 使containerd支持nvidia运行时
 
         sudo nvidia-ctk runtime configure --runtime=containerd
