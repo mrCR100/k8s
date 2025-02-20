@@ -3,48 +3,48 @@ kind: Namespace
 metadata:
   name: ollama
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ollama1gpu
-  namespace: ollama
-spec:
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      name: ollama
-  template:
-    metadata:
-      labels:
-        name: ollama
-    spec:
-      containers:
-      - name: ollama
-        image: ollama/ollama:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: http
-          containerPort: 11434
-          protocol: TCP
-        resources:
-          limits:
-            nvidia.com/gpu: 1
-        volumeMounts:
-        - name: models
-          mountPath: /root/.ollama
-      volumes:
-      - name: models
-        # just for test, use host path, it is recommanded to use PV.
-        hostPath:
-          path: /home/test/.ollama
-          type: DirectoryOrCreate
-      runtimeClassName: nvidia
-      tolerations:
-      - key: nvidia.com/gpu
-        operator: Exists
-        effect: NoSchedule
----
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: ollama1gpu
+#   namespace: ollama
+# spec:
+#   strategy:
+#     type: Recreate
+#   selector:
+#     matchLabels:
+#       name: ollama
+#   template:
+#     metadata:
+#       labels:
+#         name: ollama
+#     spec:
+#       containers:
+#       - name: ollama
+#         image: ollama/ollama:latest
+#         imagePullPolicy: IfNotPresent
+#         ports:
+#         - name: http
+#           containerPort: 11434
+#           protocol: TCP
+#         resources:
+#           limits:
+#             nvidia.com/gpu: 1
+#         volumeMounts:
+#         - name: models
+#           mountPath: /root/.ollama
+#       volumes:
+#       - name: models
+#         # just for test, use host path, it is recommanded to use PV.
+#         hostPath:
+#           path: /home/test/.ollama
+#           type: DirectoryOrCreate
+#       runtimeClassName: nvidia
+#       tolerations:
+#       - key: nvidia.com/gpu
+#         operator: Exists
+#         effect: NoSchedule
+# ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -73,8 +73,21 @@ spec:
           limits:
             nvidia.com/gpu: 3
         volumeMounts:
+        # TO DO: use host path just for test, it is recommanded to use PV.
         - name: models
           mountPath: /root/.ollama
+        env:
+        - name: OLLAMA_DEBUG
+          value: "1"
+        - name: OLLAMA_SCHED_SPREAD
+          value: "1"
+        # If the model will entirely fit on any single GPU, 
+        # Ollama will load the model on that GPU by default. 
+        # This typically provides the best performance 
+        # as it reduces the amount of data transferring across the PCI bus during inference.
+        # OLLAMA_SCHED_SPREAD=1 will spread the model across all GPUs by force.
+        - name: OLLAMA_KEEP_ALIVE
+          value: "-1"
       volumes:
       - name: models
         hostPath:
@@ -154,6 +167,7 @@ spec:
             memory: 1Gi
       restartPolicy: Always
       volumes:
+      # TO DO: use host path just for test, it is recommanded to use PV.
       - name: data-storage
         hostPath:
           path: /home/test/.open-webui
@@ -192,3 +206,47 @@ spec:
       targetPort: http
       port: 3000
   type: NodePort 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipelines
+  namespace: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipelines
+  template:
+    metadata:
+      labels:
+        app: pipelines
+    spec:
+      containers:
+      - name: pipelines
+        image: ghcr.io/open-webui/pipelines:main
+        ports:
+        - containerPort: 9099
+        volumeMounts:
+        - name: pipelines-storage
+          mountPath: /app/pipelines
+      restartPolicy: Always
+      volumes:
+      - name: pipelines-storage
+        hostPath:
+          path: /home/test/.pipelines
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipelines
+  namespace: ollama
+spec:
+  selector:
+    app: pipelines
+  ports:
+    - protocol: TCP
+      port: 9099
+      targetPort: 9099
+  type: ClusterIP
