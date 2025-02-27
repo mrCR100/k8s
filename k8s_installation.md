@@ -207,6 +207,27 @@ kubectl taint命令有一个最后有一个"-"符号，表示去掉污点。
     kube-system        kube-scheduler-test-h3c-uniserver-r5300-g6            1/1     Running   39 (4h19m ago)   4h18m
     tigera-operator    tigera-operator-7d68577dc5-qqxvw                      1/1     Running   0                4h5m
 
+## 新增节点
+
+### 主节点确认集群token信息
+
+    kubeadm token list
+
+如果没有任何输出，说明集群之前的token过期了。
+
+### 主节点生成新的token
+
+    kubeadm token create
+
+### 主节点获取CA公钥的哈希值
+
+    openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^ .* //'
+
+### 新节点加入集群
+
+kubeadm join 100.84.115.22:6443 --token r4birr.in9zhddk6wnz7rfi \
+            --discovery-token-ca-cert-hash sha256:8cbb87abe73560e439c502998f84cea8a3597173d8a0d08f030e2511755007ef
+
 ## 参考
 
 <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/>
@@ -214,3 +235,4 @@ kubectl taint命令有一个最后有一个"-"符号，表示去掉污点。
 <https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart>
 <https://github.com/kubernetes/kubeadm/issues/2686>
 <https://github.com/kubernetes/kubernetes/issues/117293>
+<https://discuss.kubernetes.io/t/cluster-info-configmap-does-not-yet-contain-a-jws-signature/14985/4>
