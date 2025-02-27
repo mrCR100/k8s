@@ -143,7 +143,7 @@ spec:
     spec:
       containers:
       - name: open-webui
-        image: ghcr.io/open-webui/open-webui:main
+        image: docker.io/library/open-webui:feature
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -154,6 +154,8 @@ spec:
           value: "http://ollama:11434"
         - name: AIOHTTP_CLIENT_TIMEOUT_OPENAI_MODEL_LIST
           value: "1"
+        - name: DEFAULT_BACKGROUND_IMAGE
+          value: "/app/backend/data/images/background.img"
         volumeMounts:
         - name: data-storage
           mountPath: /app/backend/data
