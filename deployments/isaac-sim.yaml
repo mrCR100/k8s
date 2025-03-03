@@ -22,9 +22,9 @@ spec:
     spec:
       containers:
       - name: isaac-sim
-        image: nvcr.io/nvidia/isaac-sim:4.2.0 
+        image: nvcr.io/nvidia/isaac-sim:4.5.0 
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh","-c","./isaac-sim.headless.webrtc.sh --allow-root"]
+        command: ["/bin/sh","-c","./runheadless.sh --allow-root"]
         ports:
         - name: webrtc
           containerPort: 49100
