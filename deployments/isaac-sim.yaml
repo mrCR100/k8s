@@ -9,7 +9,7 @@ metadata:
   name: isaac-sim
   namespace: nvidia
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: Recreate
   selector:
@@ -27,7 +27,7 @@ spec:
         command: ["/bin/sh","-c","./isaac-sim.headless.webrtc.sh --allow-root"]
         ports:
         - name: webrtc
-          containerPort: 8211
+          containerPort: 49100
           protocol: TCP
         resources:
           limits:
@@ -92,19 +92,4 @@ spec:
       - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
-
-# following service not work for webrtc client, tmp no idea why, may be this is some constraints.
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: isaac-sim-webrtc
-#   namespace: nvidia
-# spec:
-#   selector:
-#     name: isaac-sim
-#   ports:
-#     - protocol: TCP
-#       name: webrtc
-#       targetPort: webrtc
-#       port: 8211
+      hostNetwork: true
