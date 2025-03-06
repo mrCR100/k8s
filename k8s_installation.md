@@ -53,12 +53,15 @@ k8s的CRI默认使用containerd作为容器运行时，如果使用docker作为�
 切换root用户
 
     containerd config default > /etc/containerd/config.toml
-修改配置文件，添加如下内容：
+修改配置文件，编辑如下内容：
 
     vi /etc/containerd/config.toml
 
     [plugins."io.containerd.grpc.v1.cri"]
+        ...
           sandbox_image="registry.aliyuncs.com/google_containers/pause:3.10"
+        ...
+          systemd_group = false
         ...
         [plugins."io.containerd.grpc.v1.cri".registry]
           [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
@@ -73,13 +76,19 @@ k8s的CRI默认使用containerd作为容器运行时，如果使用docker作为�
 
     sudo systemctl restart containerd
 
+#### 下载pause镜像
+
+    docker pull registry.aliyuncs.com/google_containers/pause:3.10
+    docker save -o pause3.10.tar registry.aliyuncs.com/google_containers/pause:3.10
+     ctr -n k8s.io image import pause3.10.tar
+
 ### 关闭swap分区
 
 kubelet的正常运行需要关闭swap分区。
 
 #### 查看swap分区
 
-    swapon –show
+    swapon -show
 
 #### 临时关闭swap分区
 
@@ -206,27 +215,6 @@ kubectl taint命令有一个最后有一个"-"符号，表示去掉污点。
     kube-system        kube-proxy-lsk64                                      1/1     Running   0                4h18m
     kube-system        kube-scheduler-test-h3c-uniserver-r5300-g6            1/1     Running   39 (4h19m ago)   4h18m
     tigera-operator    tigera-operator-7d68577dc5-qqxvw                      1/1     Running   0                4h5m
-
-## 新增节点
-
-### 主节点确认集群token信息
-
-    kubeadm token list
-
-如果没有任何输出，说明集群之前的token过期了。
-
-### 主节点生成新的token
-
-    kubeadm token create
-
-### 主节点获取CA公钥的哈希值
-
-    openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^ .* //'
-
-### 新节点加入集群
-
-kubeadm join 100.84.115.22:6443 --token r4birr.in9zhddk6wnz7rfi \
-            --discovery-token-ca-cert-hash sha256:8cbb87abe73560e439c502998f84cea8a3597173d8a0d08f030e2511755007ef
 
 ## 参考
 
