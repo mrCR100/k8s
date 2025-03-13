@@ -88,6 +88,9 @@ spec:
         #   value: "1"
         - name: OLLAMA_KEEP_ALIVE
           value: "-1"
+        # tmp use GPU4,5,6 on h3c.
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "4,5,6"
       volumes:
       - name: models
         hostPath:
@@ -209,6 +212,7 @@ spec:
       name: http
       targetPort: http
       port: 3000
+      nodePort: 31727
   type: NodePort 
 ---
 apiVersion: apps/v1
