@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-custom
+  namespace: ollama
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: ollama-custom
+  template:
+    metadata:
+      labels:
+        name: ollama-custom
+    spec:
+      containers:
+      - name: ollama-custom
+        image: ollama/ollama:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 11434
+          protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - name: models
+          mountPath: /root/.ollama
+        env:
+        - name: OLLAMA_DEBUG
+          value: "1"
+        - name: OLLAMA_KEEP_ALIVE
+          value: "-1"
+      volumes:
+      - name: models
+        hostPath:
+          path: /home/test/.ollama
+          type: DirectoryOrCreate
+      runtimeClassName: nvidia
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      nodeSelector:
+        nickname: h3c
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-custom
+  namespace: ollama
+spec:
+  type: NodePort
+  selector:
+    name: ollama-custom
+  ports:
+  - name: http
+    port: 11434
+    targetPort: http
+    protocol: TCP
+    nodePort: 32123
