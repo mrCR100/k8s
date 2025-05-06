@@ -3,52 +3,10 @@ kind: Namespace
 metadata:
   name: ollama
 ---
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: ollama1gpu
-#   namespace: ollama
-# spec:
-#   strategy:
-#     type: Recreate
-#   selector:
-#     matchLabels:
-#       name: ollama
-#   template:
-#     metadata:
-#       labels:
-#         name: ollama
-#     spec:
-#       containers:
-#       - name: ollama
-#         image: ollama/ollama:latest
-#         imagePullPolicy: IfNotPresent
-#         ports:
-#         - name: http
-#           containerPort: 11434
-#           protocol: TCP
-#         resources:
-#           limits:
-#             nvidia.com/gpu: 1
-#         volumeMounts:
-#         - name: models
-#           mountPath: /root/.ollama
-#       volumes:
-#       - name: models
-#         # just for test, use host path, it is recommanded to use PV.
-#         hostPath:
-#           path: /home/test/.ollama
-#           type: DirectoryOrCreate
-#       runtimeClassName: nvidia
-#       tolerations:
-#       - key: nvidia.com/gpu
-#         operator: Exists
-#         effect: NoSchedule
-# ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama3gpu
+  name: ollama
   namespace: ollama
 spec:
   strategy:
@@ -71,7 +29,7 @@ spec:
           protocol: TCP
         resources:
           limits:
-            nvidia.com/gpu: 3
+            nvidia.com/gpu: 1
         volumeMounts:
         # TO DO: use host path just for test, it is recommanded to use PV.
         - name: models
@@ -88,9 +46,9 @@ spec:
         #   value: "1"
         - name: OLLAMA_KEEP_ALIVE
           value: "-1"
-        # tmp use GPU4,5,6 on h3c.
-        - name: NVIDIA_VISIBLE_DEVICES
-          value: "4,5,6"
+        # # tmp use GPU4,5,6 on h3c.
+        # - name: NVIDIA_VISIBLE_DEVICES
+        #   value: "4,5,6"
       volumes:
       - name: models
         hostPath:
@@ -102,7 +60,7 @@ spec:
         operator: Exists
         effect: NoSchedule
       nodeSelector:
-        nickname: h3c
+        nickname: dell3
 ---
 apiVersion: apps/v1
 kind: Deployment

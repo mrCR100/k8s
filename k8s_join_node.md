@@ -22,6 +22,10 @@
 ### 配置docker镜像仓库
 
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
+    注意：
+    需要手动下载gpg文件。
+
     sudo chmod a+r /etc/apt/keyrings/docker.asc
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
@@ -103,7 +107,7 @@ kubelet的正常运行需要关闭swap分区。
 
 ### 新节点执行加入命令
 
-kubeadm join 100.84.115.22:6443 --token 4iu68x.4a68k5fxhakks9a6  \
+kubeadm join 100.84.115.22:6443 --token nc088v.it5cbi6pnuea4496  \
             --discovery-token-ca-cert-hash sha256:8cbb87abe73560e439c502998f84cea8a3597173d8a0d08f030e2511755007ef
 
 ### 手动下载calico镜像
