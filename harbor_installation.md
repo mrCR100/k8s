@@ -90,3 +90,7 @@ goharbor/registry-photon:v2.13.0
 Error response from daemon: Get "http://harbor-core.harbor.svc.cluster.local/v2/": dial tcp: lookup harbor-core.harbor.svc.cluster.local: no such host
 
 但是使用nslookup可以正常解析。
+
+    / # docker login -u admin -p Harbor12345 http://harbor/
+    WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+    Error response from daemon: Get "http://harbor/v2/": dial tcp: lookup harbor on 127.0.0.53:53: server misbehaving

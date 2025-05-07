@@ -50,6 +50,7 @@ k8s的CRI默认使用containerd作为容器运行时，如果使用docker作为�
 
 #### 配置containerd
 
+主要是拉取镜像的仓库配置和runtime配置。
 切换root用户
 
     containerd config default > /etc/containerd/config.toml
@@ -64,9 +65,25 @@ k8s的CRI默认使用containerd作为容器运行时，如果使用docker作为�
           systemd_group = false
         ...
         [plugins."io.containerd.grpc.v1.cri".registry]
-          [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
-            [plugins."io.containerd.grpc.v1.cri".registry.mirrors."*"]
-              endpoint = ["registry.aliyuncs.com/google_containers"]
+        config_path = ""
+
+        [plugins."io.containerd.grpc.v1.cri".registry.auths]
+
+        [plugins."io.containerd.grpc.v1.cri".registry.configs]
+            [plugins."io.containerd.grpc.v1.cri".registry.configs."100.84.115.22:30080".tls]
+            insecure_skip_verify = true
+            [plugins."io.containerd.grpc.v1.cri".registry.configs."100.84.115.22:30080".auth]
+            username = "admin"
+            password = "Harbor12345"
+
+        [plugins."io.containerd.grpc.v1.cri".registry.headers]
+
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+            [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.aliyuncs.com/google_containers"]
+            endpoint = ["registry.aliyuncs.com/google_containers"]
+            [plugins."io.containerd.grpc.v1.cri".registry.mirrors."100.84.115.22:30080"]
+            endpoint = ["http://100.84.115.22:30080"]
+    ...
     [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
       ...
       [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
